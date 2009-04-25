@@ -40,6 +40,7 @@ typedef struct rp_keymap rp_keymap;
 typedef struct rp_frame rp_frame;
 typedef struct rp_child_info rp_child_info;
 typedef struct rp_group rp_group;
+typedef struct rp_virtual rp_virtual;
 typedef struct rp_window_elem rp_window_elem;
 typedef struct rp_completions rp_completions;
 typedef struct rp_input_line rp_input_line;
@@ -146,6 +147,14 @@ struct rp_group
   struct numset *numset;
 
   /* This structure can exist in a list. */
+  struct list_head node;
+};
+
+struct rp_virtual
+{
+  char *fconfig;
+  int number;
+
   struct list_head node;
 };
 
@@ -275,6 +284,9 @@ struct rp_defaults
 
   /* Frame indicator format */
   char *frame_fmt;
+
+  /* Number of virtual workspaces */
+  int virtuals;
 };
 
 /* Information about a child process. */

@@ -90,6 +90,9 @@ extern struct list_head rp_children;
 
 extern struct rp_defaults defaults;
 
+extern rp_virtual *rp_current_virtual;
+extern struct list_head rp_virtuals;
+
 /* Cached font info. */
 extern int rp_font_ascent, rp_font_descent, rp_font_width;
 

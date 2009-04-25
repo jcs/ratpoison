@@ -64,6 +64,9 @@ rp_screen *screens;
 int num_screens;
 Display *dpy;
 
+rp_virtual *rp_current_virtual;
+LIST_HEAD (rp_virtuals);
+
 rp_group *rp_current_group;
 LIST_HEAD (rp_groups);
 LIST_HEAD (rp_children);
