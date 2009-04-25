@@ -87,6 +87,9 @@ Display *dpy;
 
 int rp_have_xrandr;
 
+rp_virtual *rp_current_virtual;
+LIST_HEAD (rp_virtuals);
+
 rp_group *rp_current_group;
 LIST_HEAD (rp_groups);
 LIST_HEAD (rp_children);

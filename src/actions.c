@@ -182,6 +182,7 @@ static cmdret * set_framemsgwait(struct cmdarg **args);
 static cmdret * set_startupmessage(struct cmdarg **args);
 static cmdret * set_warp(struct cmdarg **args);
 static cmdret * set_rudeness(struct cmdarg **args);
+static cmdret * set_virtuals(struct cmdarg **args);
 
 /* command function prototypes. */
 static cmdret *cmd_abort (int interactive, struct cmdarg **args);
@@ -299,6 +300,10 @@ static cmdret *cmd_undo (int interactive, struct cmdarg **args);
 static cmdret *cmd_redo (int interactive, struct cmdarg **args);
 static cmdret *cmd_putsel (int interactive, struct cmdarg **args);
 static cmdret *cmd_getsel (int interactive, struct cmdarg **args);
+static cmdret *cmd_vdump (int interactive, struct cmdarg **args);
+static cmdret *cmd_vinit (int interactive, struct cmdarg **args);
+static cmdret *cmd_vmove (int interactive, struct cmdarg **args);
+static cmdret *cmd_vselect (int interactive, struct cmdarg **args);
 
 
 
@@ -369,6 +374,7 @@ init_set_vars (void)
   add_set_var ("startupmessage", set_startupmessage, 1, "", arg_NUMBER);
   add_set_var ("topkmap", set_topkmap, 1, "", arg_STRING);
   add_set_var ("transgravity", set_transgravity, 1, "", arg_GRAVITY);
+  add_set_var ("virtuals", set_virtuals, 1, "", arg_NUMBER);
   add_set_var ("waitcursor", set_waitcursor, 1, "", arg_NUMBER);
   add_set_var ("warp", set_warp, 1, "", arg_NUMBER);
   add_set_var ("winfmt", set_winfmt, 1, "", arg_REST);
@@ -590,6 +596,12 @@ init_user_commands(void)
   add_command ("verbexec",      cmd_verbexec,   1, 1, 1,
                "/bin/sh -c ", arg_SHELLCMD);
   add_command ("version",       cmd_version,    0, 0, 0);
+  add_command ("vdump",         cmd_vdump,      0, 0, 0);
+  add_command ("vinit",         cmd_vinit,      0, 0, 0);
+  add_command ("vmove",         cmd_vmove,      1, 1, 1,
+               "Move to Virtual Workspace: ", arg_NUMBER);
+  add_command ("vselect",       cmd_vselect,    1, 1, 1,
+               "Virtual Workspace: ", arg_NUMBER);
   add_command ("vsplit",        cmd_v_split,    1, 0, 0,
                "Split: ", arg_STRING);
   add_command ("warp",          cmd_warp,       1, 1, 1,
@@ -4485,6 +4497,20 @@ set_bwcolor (struct cmdarg **args)
   return cmdret_new (RET_SUCCESS, NULL);
 }
 
+static cmdret *
+set_virtuals (struct cmdarg **args)
+{
+  if (args[0] == NULL)
+    return cmdret_new (RET_SUCCESS, "%d", defaults.virtuals);
+
+  if (ARG(0,number) < 0)
+    return cmdret_new (RET_FAILURE, "virtuals: invalid argument");
+
+  defaults.virtuals = ARG(0,number);
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
 cmdret *
 cmd_setenv (int interactive UNUSED, struct cmdarg **args)
 {
@@ -6344,6 +6370,183 @@ cmd_getsel (int interactive UNUSED, struct cmdarg **args UNUSED)
     return cmdret_new (RET_FAILURE, "getsel: no X11 selection");
 }
 
+cmdret *
+cmd_vdump (int interactive, struct cmdarg **args)
+{
+  struct cmdarg *arg;
+
+  rp_virtual *cur;
+
+  arg = xmalloc (sizeof(struct cmdarg));
+
+  PRINT_DEBUG (("virtual workspace config:\n"));
+
+  list_for_each_entry (cur, &rp_virtuals, node) {
+    PRINT_DEBUG ((" %d: %s\n", cur->number, cur->fconfig));
+  }
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+cmdret *
+cmd_vinit (int interactive, struct cmdarg **args)
+{
+  int x;
+  char *input;
+  struct cmdarg *arg;
+  rp_screen *screen = rp_current_screen;
+  rp_virtual *first;
+
+  INIT_LIST_HEAD (&rp_virtuals);
+
+  /* select - */
+  PRINT_DEBUG (("vinit: selecting -\n"));
+  arg = xmalloc (sizeof(struct cmdarg));
+  (arg)->type = arg_STRING;
+  input = xstrdup("-");
+  (arg)->string = input;
+  cmd_select (0, &arg);
+
+  PRINT_DEBUG (("vinit: only\n"));
+  cmd_only (0, NULL);
+
+  /* create a new group for each virtual space and init frame config */
+  for (x = 1; x <= defaults.virtuals; x++) {
+    rp_virtual *v;
+
+    if (x == 1)
+      input = xstrdup ("default");
+    else
+      input = xsprintf ("virtual%d", x);
+
+    PRINT_DEBUG (("vinit: creating space %d (%s)\n", x, input));
+
+    (arg)->string = input;
+    cmd_gnew (0, &arg);
+
+    v = xmalloc (sizeof (rp_virtual));
+    v->number = x;
+    v->fconfig = fdump (screen);
+
+    rp_current_virtual = v;
+
+    list_add_tail (&v->node, &rp_virtuals);
+  }
+
+  /* start in workspace 1 */
+  PRINT_DEBUG (("vinit: selecting default\n"));
+  input = xstrdup ("default");
+  (arg)->string = input;
+  cmd_gselect (0, &arg);
+  list_first (first, &rp_virtuals, node);
+  if (first) {
+    rp_current_virtual = first;
+
+    /* restore the frames */
+    PRINT_DEBUG (("vinit: restoring frame config\n"));
+    frestore (first->fconfig, screen);
+  } else
+    PRINT_DEBUG (("vinit: no first virtual?!\n"));
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+cmdret *
+cmd_vmove (int interactive, struct cmdarg **args)
+{
+  char *input;
+  int which = ARG(0, number);
+  int found = 0;
+
+  rp_virtual *cur;
+  rp_group *g;
+  rp_window *curw, *prevw;
+  rp_frame *frame = current_frame();
+
+  curw = current_window ();
+  if (curw == NULL)
+    return cmdret_new (RET_FAILURE, "vmove: no focused window");
+
+  prevw = group_prev_window (rp_current_group, curw);
+
+  list_for_each_entry (cur, &rp_virtuals, node) {
+    if (cur->number == which) {
+      if (which == 1)
+        input = xstrdup ("default");
+      else
+        input = xsprintf ("virtual%d", cur->number);
+
+      if ((g = groups_find_group_by_name(input, 1)) != NULL) {
+        group_move_window (g, curw);
+        found = 1;
+        break;
+      }
+    }
+  }
+
+  if (!found)
+    return cmdret_new (RET_FAILURE, "vmove: no such virtual workspace");
+
+  /* select previous window in this group to make this one disappear */
+  if (prevw)
+    set_active_window (prevw);
+  else
+    frame->win_number = EMPTY;
+
+  /* then switch to the found virtual */
+  cmd_vselect (0, args);
+
+  /* and make the moved window the current */
+  set_active_window (curw);
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+cmdret *
+cmd_vselect (int interactive, struct cmdarg **args)
+{
+  char *input;
+  struct cmdarg *arg;
+  int which = ARG(0, number);
+
+  rp_virtual *cur;
+  rp_screen *screen = rp_current_screen;
+
+  if (rp_current_virtual->number == which)
+    /* don't bother */
+    return cmdret_new (RET_SUCCESS, NULL);
+
+  arg = xmalloc (sizeof(struct cmdarg));
+
+  /* store the current frame config */
+  rp_current_virtual->fconfig = fdump (screen);
+
+  list_for_each_entry (cur, &rp_virtuals, node) {
+    if (cur->number == which) {
+      if (which == 1)
+        input = xstrdup ("default");
+      else
+        input = xsprintf ("virtual%d", cur->number);
+
+      PRINT_DEBUG (("selecting %s\n", input));
+
+      (arg)->string = input;
+      cmd_gselect (0, &arg);
+
+      /* restore this space's frame config */
+      frestore (cur->fconfig, screen);
+
+      rp_current_virtual = cur;
+
+      return cmdret_new (RET_SUCCESS, NULL);
+    }
+  }
+
+  return cmdret_new (RET_FAILURE, "vselect: no such virtual workspace");
+}
+
+/* This is a command that restores old commands that have been
+   recently depricated. */
 cmdret *
 cmd_commands (int interactive UNUSED, struct cmdarg **args UNUSED)
 {
