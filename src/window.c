@@ -601,8 +601,14 @@ get_window_list (char *fmt, char *delim, struct sbuf *buffer,
     {
       PRINT_DEBUG (("%d-%s\n", we->number, window_name (we->win)));
 
-      if (we->win == current_window())
-        *mark_start = strlen (sbuf_get (buffer));
+      if (we->win != current_window())
+        {
+	  if (defaults.bar_sticky)
+	    /* when sticky bar is on, we only want to show the current window */
+	    continue;
+	  else
+	    *mark_start = strlen (sbuf_get (buffer));
+	}
 
       /* A hack, pad the window with a space at the beginning and end
          if there is no delimiter. */

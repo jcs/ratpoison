@@ -62,16 +62,24 @@ hide_bar (rp_screen *s)
 {
   if (s->bar_is_raised)
     {
-      s->bar_is_raised = 0;
-      XUnmapWindow (dpy, s->bar_window);
-
-      /* Possibly restore colormap. */
-      if (current_window())
+      if (defaults.bar_sticky)
 	{
-	  XUninstallColormap (dpy, s->def_cmap);
-	  XInstallColormap (dpy, current_window()->colormap);
+	  /* Something just wanted the current message gone. */
+	  s->bar_is_raised = BAR_IS_WINDOW_LIST;
+	  show_bar(s, defaults.window_fmt);
 	}
+      else
+        {
+          s->bar_is_raised = 0;
+          XUnmapWindow (dpy, s->bar_window);
 
+          /* Possibly restore colormap. */
+          if (current_window())
+	    {
+	      XUninstallColormap (dpy, s->def_cmap);
+	      XInstallColormap (dpy, current_window()->colormap);
+	    }
+	}
       return 1;
     }
 
@@ -636,9 +644,15 @@ marked_message_internal (char *msg, int mark_start, int mark_end)
 
   prepare_bar (s, width, height);
 
-  /* Draw the mark over the designated part of the string. */
-  correct_mark (strlen (msg), &mark_start, &mark_end);
-  draw_mark (s, msg, mark_start, mark_end);
+  if (defaults.bar_sticky)
+    /* Sticky bar is only showing the current window title, don't mark it */
+    mark_start = mark_end = -1;
+  else
+    {
+      /* Draw the mark over the designated part of the string. */
+      correct_mark (strlen (msg), &mark_start, &mark_end);
+      draw_mark (s, msg, mark_start, mark_end);
+    }
 
   draw_string (s, msg, mark_start, mark_end);
 
