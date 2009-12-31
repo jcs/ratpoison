@@ -610,6 +610,8 @@ screen_update (rp_screen *s, int left, int top, int width, int height)
   s->height = height;
 
   XMoveResizeWindow (dpy, s->help_window, s->left, s->top, s->width, s->height);
+  if (defaults.bar_sticky)
+    hide_bar (s);
 
   list_for_each_entry (f, &s->frames, node)
     {

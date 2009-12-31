@@ -62,16 +62,24 @@ hide_bar (rp_screen *s)
 {
   if (s->bar_is_raised)
     {
-      s->bar_is_raised = 0;
-      XUnmapWindow (dpy, s->bar_window);
-
-      /* Possibly restore colormap. */
-      if (current_window())
+      if (defaults.bar_sticky)
 	{
-	  XUninstallColormap (dpy, s->def_cmap);
-	  XInstallColormap (dpy, current_window()->colormap);
+	  /* Something just wanted the current message gone. */
+	  s->bar_is_raised = BAR_IS_WINDOW_LIST;
+	  show_bar(s, defaults.window_fmt);
 	}
+      else
+        {
+          s->bar_is_raised = 0;
+          XUnmapWindow (dpy, s->bar_window);
 
+          /* Possibly restore colormap. */
+          if (current_window())
+	    {
+	      XUninstallColormap (dpy, s->def_cmap);
+	      XInstallColormap (dpy, current_window()->colormap);
+	    }
+	}
       return 1;
     }
 
@@ -85,7 +93,11 @@ show_bar (rp_screen *s, char *fmt)
   if (!s->bar_is_raised)
     {
       s->bar_is_raised = BAR_IS_WINDOW_LIST;
-      XMapRaised (dpy, s->bar_window);
+      if (defaults.bar_sticky)
+        XMapWindow (dpy, s->bar_window);
+      else
+        XMapRaised (dpy, s->bar_window);
+
       update_window_names (s, fmt);
 
       /* Switch to the default colormap */
@@ -483,9 +495,12 @@ correct_mark (int msg_len, int *mark_start, int *mark_end)
 
 /* Raise the bar and put it in the right spot */
 static void
-prepare_bar (rp_screen *s, int width, int height)
+prepare_bar (rp_screen *s, int width, int height, int multiline)
 {
-  width = width < s->width ? width : s->width;
+  if (defaults.bar_sticky)
+    width = s->width;
+  else
+    width = width < s->width ? width : s->width;
   height = height < s->height ? height : s->height;
   XMoveResizeWindow (dpy, s->bar_window,
                      bar_x (s, width), bar_y (s, height),
@@ -495,7 +510,10 @@ prepare_bar (rp_screen *s, int width, int height)
   if (!s->bar_is_raised)
     {
       s->bar_is_raised = BAR_IS_MESSAGE;
-      XMapRaised (dpy, s->bar_window);
+      if (defaults.bar_sticky && !multiline)
+        XMapWindow (dpy, s->bar_window);
+      else
+        XMapRaised (dpy, s->bar_window);
 
       /* Switch to the default colormap */
       if (current_window())
@@ -503,7 +521,10 @@ prepare_bar (rp_screen *s, int width, int height)
       XInstallColormap (dpy, s->def_cmap);
     }
 
-  XRaiseWindow (dpy, s->bar_window);
+  if (multiline || !defaults.bar_sticky)
+    XRaiseWindow (dpy, s->bar_window);
+  else if (defaults.bar_sticky)
+    XLowerWindow (dpy, s->bar_window);
   XClearWindow (dpy, s->bar_window);
   XSync (dpy, False);
 }
@@ -634,11 +655,17 @@ marked_message_internal (char *msg, int mark_start, int mark_end)
   width = defaults.bar_x_padding * 2 + max_line_length(msg);
   height = FONT_HEIGHT (s) * num_lines + defaults.bar_y_padding * 2;
 
-  prepare_bar (s, width, height);
+  prepare_bar (s, width, height, num_lines > 1 ? 1 : 0);
 
-  /* Draw the mark over the designated part of the string. */
-  correct_mark (strlen (msg), &mark_start, &mark_end);
-  draw_mark (s, msg, mark_start, mark_end);
+  if (defaults.bar_sticky)
+    /* Sticky bar is only showing the current window title, don't mark it */
+    mark_start = mark_end = -1;
+  else
+    {
+      /* Draw the mark over the designated part of the string. */
+      correct_mark (strlen (msg), &mark_start, &mark_end);
+      draw_mark (s, msg, mark_start, mark_end);
+    }
 
   draw_string (s, msg, mark_start, mark_end);
 

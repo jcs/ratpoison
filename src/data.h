@@ -260,6 +260,7 @@ struct rp_defaults
   int bar_timeout;
   int bar_border_width;
   int bar_in_padding;
+  int bar_sticky;
 
   int frame_indicator_timeout;
   int frame_resize_unit;
