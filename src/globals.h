@@ -135,6 +135,7 @@ extern Atom xa_utf8_string;
 /* netwm atoms. */
 extern Atom _net_wm_pid;
 extern Atom _net_supported;
+extern Atom _net_active_window;
 extern Atom _net_wm_window_type;
 extern Atom _net_wm_window_type_dialog;
 extern Atom _net_wm_name;
