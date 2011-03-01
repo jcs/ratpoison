@@ -75,6 +75,7 @@ Atom xa_utf8_string;
 /* netwm atoms */
 Atom _net_wm_pid;
 Atom _net_supported;
+Atom _net_active_window;
 Atom _net_wm_window_type;
 Atom _net_wm_window_type_dialog;
 Atom _net_wm_name;
@@ -287,6 +288,8 @@ set_rp_window_focus (rp_window *win)
   PRINT_DEBUG (("Giving focus to '%s'\n", window_name (win)));
   XSetInputFocus (dpy, win->w,
                   RevertToPointerRoot, CurrentTime);
+  XChangeProperty(dpy, win->scr->root, _net_active_window, XA_WINDOW, 32,
+    PropModeReplace, (unsigned char *)&win->w, 1);
 }
 
 void
