@@ -183,6 +183,7 @@ static cmdret * set_startupmessage(struct cmdarg **args);
 static cmdret * set_warp(struct cmdarg **args);
 static cmdret * set_rudeness(struct cmdarg **args);
 static cmdret * set_virtuals(struct cmdarg **args);
+static cmdret * set_screensize(struct cmdarg **args);
 
 /* command function prototypes. */
 static cmdret *cmd_abort (int interactive, struct cmdarg **args);
@@ -381,6 +382,8 @@ init_set_vars (void)
   add_set_var ("winname", set_winname, 1, "", arg_STRING);
   add_set_var ("virtuals", set_virtuals, 1, "", arg_NUMBER);
   add_set_var ("barsticky", set_barsticky, 1, "", arg_STRING);
+  add_set_var ("screensize", set_screensize, 2,
+               "", arg_NUMBER, "", arg_NUMBER);
 }
 
 /* i_nrequired is the number required when called
@@ -4144,6 +4147,28 @@ set_padding (struct cmdarg **args)
   defaults.padding_right  = r;
   defaults.padding_top    = t;
   defaults.padding_bottom = b;
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+static cmdret *
+set_screensize (struct cmdarg **args)
+{
+  int w, h, i;
+
+  if (args[0] == NULL)
+    return cmdret_new (RET_SUCCESS, "%d %d",
+                              defaults.screen_width,
+                              defaults.screen_height);
+
+  w = ARG(0,number);
+  h = ARG(1,number);
+
+  defaults.screen_width = w;
+  defaults.screen_height = h;
+
+  for (i=0; i<num_screens; i++)
+    screen_update ((rp_screen *)&screens[i], w, h);
 
   return cmdret_new (RET_SUCCESS, NULL);
 }

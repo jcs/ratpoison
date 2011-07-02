@@ -537,6 +537,9 @@ init_defaults (void)
   defaults.padding_top    = 0;
   defaults.padding_bottom = 0;
 
+  defaults.screen_width   = 0;
+  defaults.screen_height  = 0;
+
 #ifdef USE_XFT_FONT
   defaults.font_string = xstrdup (DEFAULT_XFT_FONT);
 #else

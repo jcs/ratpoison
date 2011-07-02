@@ -243,6 +243,9 @@ struct rp_defaults
   int padding_top;
   int padding_bottom;
 
+  int screen_width;
+  int screen_height;
+
   XFontSet font;
   char *font_string;
   int utf8_locale;

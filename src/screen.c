@@ -27,13 +27,15 @@ static void init_screen (rp_screen *s, int screen_num);
 int
 screen_width (rp_screen *s)
 {
-  return s->width - defaults.padding_right - defaults.padding_left;
+  return (defaults.screen_width ? defaults.screen_width : s->width) -
+    defaults.padding_right - defaults.padding_left;
 }
 
 int
 screen_height (rp_screen *s)
 {
-  return s->height - defaults.padding_bottom - defaults.padding_top;
+  return (defaults.screen_height ? defaults.screen_height : s->height) -
+    defaults.padding_bottom - defaults.padding_top;
 }
 
 int
@@ -481,6 +483,11 @@ screen_update (rp_screen *s, int width, int height)
   if (s->width == width && s->height == height)
     /* nothing to do */
     return;
+
+  if (defaults.screen_width)
+    width = defaults.screen_width;
+  if (defaults.screen_height)
+    height = defaults.screen_height;
 
   oldwidth = s->width; oldheight = s->height;
   s->width = width; s->height = height;
