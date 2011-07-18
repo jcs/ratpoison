@@ -601,6 +601,8 @@ init_user_commands(void)
   add_command ("version",       cmd_version,    0, 0, 0);
   add_command ("vdump",         cmd_vdump,      0, 0, 0);
   add_command ("vinit",         cmd_vinit,      0, 0, 0);
+  add_command ("vmove",         cmd_vmove,      1, 1, 1,
+               "Move to Virtual Workspace: ", arg_NUMBER);
   add_command ("vselect",       cmd_vselect,    1, 1, 1,
                "Virtual Workspace: ", arg_NUMBER);
   add_command ("vsplit",        cmd_v_split,    1, 0, 0,
@@ -6429,6 +6431,36 @@ cmd_vinit (int interactive, struct cmdarg **args)
 }
 
 cmdret *
+cmd_vmove (int interactive, struct cmdarg **args)
+{
+  char *input;
+  int which = ARG(0, number);
+
+  rp_virtual *cur;
+  rp_group *g;
+
+  if (current_window() == NULL)
+    return cmdret_new (RET_FAILURE, "vmove: no focused window");
+
+  list_for_each_entry (cur, &rp_virtuals, node) {
+    if (cur->number == which) {
+      if (which == 1)
+        input = xstrdup ("default");
+      else
+        input = xsprintf ("virtual%d", cur->number);
+
+      if ((g = groups_find_group_by_name(input, 1)) != NULL) {
+        group_move_window (g, current_window());
+
+        return cmdret_new (RET_SUCCESS, NULL);
+      }
+    }
+  }
+
+  return cmdret_new (RET_FAILURE, "vmove: no such virtual workspace");
+}
+
+cmdret *
 cmd_vselect (int interactive, struct cmdarg **args)
 {
   char *input;
@@ -6438,11 +6470,11 @@ cmd_vselect (int interactive, struct cmdarg **args)
   rp_virtual *cur;
   rp_screen *screen = current_screen();
 
-  arg = xmalloc (sizeof(struct cmdarg));
-
   if (rp_current_virtual->number == which)
     /* don't bother */
     return cmdret_new (RET_SUCCESS, NULL);
+
+  arg = xmalloc (sizeof(struct cmdarg));
 
   /* store the current frame config */
   rp_current_virtual->fconfig = fdump (screen);
