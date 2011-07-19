@@ -59,6 +59,7 @@ Atom _net_active_window;
 Atom _net_wm_window_type;
 Atom _net_wm_window_type_dialog;
 Atom _net_wm_name;
+Atom _net_workarea;
 
 int rp_current_screen;
 rp_screen *screens;

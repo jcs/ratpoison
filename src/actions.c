@@ -4093,7 +4093,8 @@ static cmdret *
 set_padding (struct cmdarg **args)
 {
   rp_frame *frame;
-  int l, t, r, b;
+  int l, t, r, b, i;
+  long workarea[4];
 
   if (args[0] == NULL)
     return cmdret_new (RET_SUCCESS, "%d %d %d %d",
@@ -4149,6 +4150,17 @@ set_padding (struct cmdarg **args)
   defaults.padding_right  = r;
   defaults.padding_top    = t;
   defaults.padding_bottom = b;
+
+  /* adjust our workarea to anyone that needs it */
+  for (i=0; i<num_screens; i++)
+    {
+      workarea[0] = defaults.padding_left;
+      workarea[1] = defaults.padding_top;
+      workarea[2] = screens[i].width - defaults.padding_left - defaults.padding_right;
+      workarea[3] = screens[i].height - defaults.padding_top - defaults.padding_bottom;
+
+      XChangeProperty(dpy, RootWindow (dpy, screens[i].screen_num), _net_workarea, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &workarea, 4);
+    }
 
   return cmdret_new (RET_SUCCESS, NULL);
 }
