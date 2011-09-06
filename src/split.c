@@ -244,7 +244,10 @@ find_frame_prev (rp_frame *frame)
 rp_window *
 current_window (void)
 {
-  return find_window_number (current_frame()->win_number);
+  if (current_frame())
+    return find_window_number (current_frame()->win_number);
+  else
+    return NULL;
 }
 
 static int
