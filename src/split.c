@@ -421,8 +421,8 @@ resize_shrink_to_window (rp_frame *frame)
 
   win = find_window_number (frame->win_number);
 
-  resize_frame_horizontally (frame, win->width + win->border*2 - frame->width);
-  resize_frame_vertically (frame, win->height + win->border*2 - frame->height);
+  resize_frame_horizontally (frame, win->width + win->border*2 + defaults.gap*2 - frame->width);
+  resize_frame_vertically (frame, win->height + win->border*2 + defaults.gap*2 - frame->height);
 }
 
 /* resize_frame is a generic frame resizer that can resize vertically,
@@ -451,7 +451,7 @@ resize_frame (rp_frame *frame, rp_frame *pusher, int diff,
         {
           /* If the frame can't get any smaller, then fail. */
           if (diff > 0
-              && abs ((*c3)(cur) - (*c1)(cur)) - diff <= defaults.window_border_width * 2)
+              && abs ((*c3)(cur) - (*c1)(cur)) - diff <= defaults.gap * 2 + defaults.window_border_width * 2)
             return -1;
           /* Test for this circumstance:
              --+
@@ -548,7 +548,7 @@ resize_frame_horizontally (rp_frame *frame, int diff)
   if (num_frames (s) < 2 || diff == 0)
     return;
 
-  if (frame_width (frame) + diff <= defaults.window_border_width * 2)
+  if (frame_width (frame) + diff <= defaults.gap * 2 + defaults.window_border_width * 2)
     return;
 
   /* Find out which resize function to use. */
@@ -594,7 +594,7 @@ resize_frame_vertically (rp_frame *frame, int diff)
   if (num_frames (s) < 2 || diff == 0)
     return;
 
-  if (frame_height (frame) + diff <= defaults.window_border_width * 2)
+  if (frame_height (frame) + diff <= defaults.gap * 2 + defaults.window_border_width * 2)
     return;
 
   /* Find out which resize function to use. */

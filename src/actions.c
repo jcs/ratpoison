@@ -184,6 +184,7 @@ static cmdret * set_warp(struct cmdarg **args);
 static cmdret * set_rudeness(struct cmdarg **args);
 static cmdret * set_virtuals(struct cmdarg **args);
 static cmdret * set_screensize(struct cmdarg **args);
+static cmdret * set_gap(struct cmdarg **args);
 
 /* command function prototypes. */
 static cmdret *cmd_abort (int interactive, struct cmdarg **args);
@@ -384,6 +385,7 @@ init_set_vars (void)
   add_set_var ("barsticky", set_barsticky, 1, "", arg_STRING);
   add_set_var ("screensize", set_screensize, 2,
                "", arg_NUMBER, "", arg_NUMBER);
+  add_set_var ("gap", set_gap, 1, "", arg_NUMBER);
 }
 
 /* i_nrequired is the number required when called
@@ -4524,6 +4526,23 @@ set_virtuals (struct cmdarg **args)
     return cmdret_new (RET_FAILURE, "virtuals: invalid argument");
 
   defaults.virtuals = ARG(0,number);
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+static cmdret *
+set_gap (struct cmdarg **args)
+{
+  int new_value;
+
+  if (args[0] == NULL)
+    return cmdret_new (RET_SUCCESS, "%d", defaults.gap);
+
+  new_value = ARG(0,number);
+  if (new_value < 0)
+    return cmdret_new (RET_FAILURE, "gap: invalid argument");
+
+  defaults.gap = new_value;
 
   return cmdret_new (RET_SUCCESS, NULL);
 }

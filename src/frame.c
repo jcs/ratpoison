@@ -282,10 +282,10 @@ frame_read (char *str, rp_screen *screen)
     f->x = 0;
   if (f->y <= 0)
     f->y = 0;
-  if (f->width <= defaults.window_border_width*2)
-    f->width = defaults.window_border_width*2 + 1;
-  if (f->height <= defaults.window_border_width*2)
-    f->height = defaults.window_border_width*2 + 1;
+  if (f->width <= defaults.window_border_width*2 + defaults.gap * 2)
+    f->width = defaults.window_border_width*2 + defaults.gap * 2 + 1;
+  if (f->height <= defaults.window_border_width*2 + defaults.gap * 2)
+    f->height = defaults.window_border_width*2 + defaults.gap * 2 + 1;
   if (f->last_access < 0)
     f->last_access = 0;
 
