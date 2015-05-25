@@ -184,6 +184,7 @@ static cmdret * set_startupmessage(struct cmdarg **args);
 static cmdret * set_warp(struct cmdarg **args);
 static cmdret * set_rudeness(struct cmdarg **args);
 static cmdret * set_virtuals(struct cmdarg **args);
+static cmdret * set_gap(struct cmdarg **args);
 
 /* command function prototypes. */
 static cmdret *cmd_abort (int interactive, struct cmdarg **args);
@@ -361,6 +362,7 @@ init_set_vars (void)
   add_set_var ("framemsgwait", set_framemsgwait, 1, "", arg_NUMBER);
   add_set_var ("framesels", set_framesels, 1, "", arg_STRING);
   add_set_var ("fwcolor", set_fwcolor, 1, "", arg_STRING);
+  add_set_var ("gap", set_gap, 1, "", arg_NUMBER);
   add_set_var ("historycompaction", set_historycompaction, 1, "", arg_NUMBER);
   add_set_var ("historyexpansion", set_historyexpansion, 1, "", arg_NUMBER);
   add_set_var ("historysize", set_historysize, 1, "", arg_NUMBER);
@@ -4538,6 +4540,29 @@ set_virtuals (struct cmdarg **args)
     return cmdret_new (RET_FAILURE, "virtuals: invalid argument");
 
   defaults.virtuals = ARG(0,number);
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+static cmdret *
+set_gap (struct cmdarg **args)
+{
+  rp_window *win;
+
+  if (args[0] == NULL)
+    return cmdret_new (RET_SUCCESS, "%d", defaults.gap);
+
+  if (ARG(0,number) < 0)
+    return cmdret_new (RET_FAILURE, "gap: invalid argument");
+
+  defaults.gap = ARG(0,number);
+
+  /* Update all the visible windows. */
+  list_for_each_entry (win,&rp_mapped_window,node)
+    {
+      if (win_get_frame (win))
+        maximize (win);
+    }
 
   return cmdret_new (RET_SUCCESS, NULL);
 }

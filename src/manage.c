@@ -551,17 +551,17 @@ move_window (rp_window *win)
     case NorthWestGravity:
     case WestGravity:
     case SouthWestGravity:
-      win->x = frame->x;
+      win->x = frame->x + defaults.gap;
       break;
     case NorthGravity:
     case CenterGravity:
     case SouthGravity:
-      win->x = frame->x + (frame->width - win->border * 2) / 2 - win->width / 2;
+      win->x = frame->x + (frame->width - win->border*2 - defaults.gap*2)/2 - win->width/2;
       break;
     case NorthEastGravity:
     case EastGravity:
     case SouthEastGravity:
-      win->x = frame->x + frame->width - win->width - win->border;
+      win->x = frame->x + frame->width - win->width - win->border - defaults.gap;
       break;
     }
 
@@ -571,19 +571,29 @@ move_window (rp_window *win)
     case NorthEastGravity:
     case NorthGravity:
     case NorthWestGravity:
-      win->y = frame->y;
+      win->y = frame->y + defaults.gap;
       break;
     case EastGravity:
     case CenterGravity:
     case WestGravity:
-      win->y = frame->y + (frame->height - win->border * 2) / 2 - win->height / 2;
+      win->y = frame->y + (frame->height - win->border*2 - defaults.gap*2)/2 - win->height/2;
       break;
     case SouthEastGravity:
     case SouthGravity:
     case SouthWestGravity:
-      win->y = frame->y + frame->height - win->height - win->border;
+      win->y = frame->y + frame->height - win->height - win->border - defaults.gap;
       break;
     }
+
+  if (win->x < frame->x + defaults.gap)
+    win->x = frame->x + defaults.gap;
+  if (win->y < frame->y + defaults.gap)
+    win->y = frame->y + defaults.gap;
+
+  if (frame->x == defaults.padding_left)
+    win->x += defaults.gap;
+  if (frame->y == defaults.padding_top)
+    win->y += defaults.gap;
 }
 
 /* Set a transient window's x,y,width,height fields to maximize the
@@ -657,7 +667,7 @@ static void
 maximize_normal (rp_window *win)
 {
   rp_frame *frame;
-  int maxx, maxy;
+  int maxx, maxy, gapx, gapy;
 
   frame = win_get_frame (win);
 
@@ -681,8 +691,8 @@ maximize_normal (rp_window *win)
     }
   else
     {
-      maxx = frame->width - win->border * 2;
-      maxy = frame->height - win->border * 2;
+      maxx = frame->width - (win->border * 2) - (defaults.gap * 2);
+      maxy = frame->height - (win->border * 2) - (defaults.gap * 2);
     }
 
   /* Honour the window's aspect ratio. */
@@ -710,8 +720,20 @@ maximize_normal (rp_window *win)
       PRINT_DEBUG (("frame width=%d height=%d\n",
                    frame->width, frame->height));
 
-      if (maxx > frame->width) maxx = frame->width - win->border * 2;
-      if (maxy > frame->height) maxy = frame->height - win->border * 2;
+      gapx = gapy = 2;
+      if (frame->x == defaults.padding_left)
+        gapx++;
+      if (frame->x + frame->width == win->scr->width - defaults.padding_right)
+        gapx++;
+      if (frame->y == defaults.padding_top)
+        gapy++;
+      if (frame->y + frame->height == win->scr->height - defaults.padding_bottom)
+        gapy++;
+
+      if (maxx > frame->width - (win->border * 2) - (defaults.gap * gapx))
+        maxx = frame->width - (win->border * 2) - (defaults.gap * gapx);
+      if (maxy > frame->height - (win->border * 2) - (defaults.gap * gapy))
+        maxy = frame->height - (win->border * 2) - (defaults.gap * gapy);
     }
 
   /* Make sure we maximize to the nearest Resize Increment specified
