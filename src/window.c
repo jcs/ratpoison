@@ -612,14 +612,14 @@ get_window_list (char *fmt, char *delim, struct sbuf *buffer,
 
       /* A hack, pad the window with a space at the beginning and end
          if there is no delimiter. */
-      if (!delim)
+      if (!delim && !defaults.bar_sticky)
         sbuf_concat (buffer, " ");
 
       format_string (fmt, we, buffer);
 
       /* A hack, pad the window with a space at the beginning and end
          if there is no delimiter. */
-      if (!delim)
+      if (!delim && !defaults.bar_sticky)
         sbuf_concat (buffer, " ");
 
       /* Only put the delimiter between the windows, and not after the the last
