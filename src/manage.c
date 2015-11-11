@@ -655,8 +655,8 @@ maximize_transient (rp_window *win)
 
   /* Always use the window's current width and height for
      transients. */
-  maxx = win->width - defaults.gap * 2;
-  maxy = win->height - defaults.gap * 2;
+  maxx = win->width;
+  maxy = win->height;
 
   /* Fit the window inside its frame (if it has one) */
   if (frame)
@@ -664,10 +664,8 @@ maximize_transient (rp_window *win)
       PRINT_DEBUG (("frame width=%d height=%d\n",
                    frame->width, frame->height));
 
-      if (maxx + (win->border * 2) + (defaults.gap * 2) > frame->width)
-        maxx = frame->width - (win->border * 2) + (defaults.gap * 2);
-      if (maxy + (win->border * 2) + (defaults.gap * 2) > frame->height)
-        maxy = frame->height - (win->border * 2) + (defaults.gap * 2);
+      if (maxx + win->border * 2 > frame->width) maxx = frame->width - win->border * 2;
+      if (maxy + win->border * 2 > frame->height) maxy = frame->height - win->border * 2;
     }
 
   /* Make sure we maximize to the nearest Resize Increment specified
