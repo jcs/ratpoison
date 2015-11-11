@@ -561,7 +561,10 @@ get_more_input (char *prompt, char *preinput, int history_id,
   XInstallColormap (dpy, s->def_cmap);
 
   XMapWindow (dpy, s->input_window);
-  XRaiseWindow (dpy, s->input_window);
+  if (defaults.bar_sticky)
+    XLowerWindow (dpy, s->bar_window);
+  else
+    XRaiseWindow (dpy, s->input_window);
   XClearWindow (dpy, s->input_window);
   /* Switch focus to our input window to read the next key events. */
   XGetInputFocus (dpy, &focus, &revert);
