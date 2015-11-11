@@ -58,6 +58,7 @@ Atom _net_supported;
 Atom _net_active_window;
 Atom _net_wm_window_type;
 Atom _net_wm_window_type_dialog;
+Atom _net_wm_window_type_dock;
 Atom _net_wm_name;
 Atom _net_workarea;
 
