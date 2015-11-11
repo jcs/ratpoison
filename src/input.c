@@ -454,6 +454,15 @@ update_input_window (rp_screen *s, rp_input_line *line)
       total_width = defaults.input_window_size + prompt_width;
     }
 
+  /* when using bar sticky, make sure our input covers the bar completely */
+  if (defaults.bar_sticky) {
+    XWindowAttributes attr;
+    XGetWindowAttributes (dpy, s->bar_window, &attr);
+
+    if (total_width < attr.width)
+      total_width = attr.width;
+  }
+
   XMoveResizeWindow (dpy, s->input_window,
                      bar_x (s, total_width), bar_y (s, height), total_width,
                      (FONT_HEIGHT (s) + defaults.bar_y_padding * 2));
