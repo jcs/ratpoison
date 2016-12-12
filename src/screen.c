@@ -340,7 +340,10 @@ init_screen (rp_screen *s, int screen_num)
 
   /* Setup the window that will receive all keystrokes once the prefix
      key has been pressed. */
-  s->key_window = XCreateSimpleWindow (dpy, s->root, 0, 0, 1, 1, 0,
+  s->key_window = XCreateSimpleWindow (dpy, s->root,
+                                       DisplayWidth(dpy, screen_num) + 1,
+                                       DisplayHeight(dpy, screen_num) + 1,
+                                       1, 1, 0,
                                        WhitePixel (dpy, s->screen_num),
                                        BlackPixel (dpy, s->screen_num));
   XChangeProperty (dpy, s->key_window, _net_wm_window_type, XA_ATOM, 32,
