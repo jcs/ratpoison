@@ -1,5 +1,8 @@
 ###ratpoison-jcs
 
+*(Note: this was migrated from commits on upstream's `master` branch to a new
+`jcs` branch on 2016-12-19)*
+
 This is mostly just a tree for me to throw stuff into and some of these may
 not be suitable for pushing upstream.
 
