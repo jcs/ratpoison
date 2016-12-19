@@ -341,9 +341,7 @@ init_screen (rp_screen *s, int screen_num)
   /* Setup the window that will receive all keystrokes once the prefix
      key has been pressed. */
   s->key_window = XCreateSimpleWindow (dpy, s->root,
-                                       DisplayWidth(dpy, screen_num) + 1,
-                                       DisplayHeight(dpy, screen_num) + 1,
-                                       1, 1, 0,
+                                       s->width + 1, s->height + 1, 1, 1, 0,
                                        WhitePixel (dpy, s->screen_num),
                                        BlackPixel (dpy, s->screen_num));
   XChangeProperty (dpy, s->key_window, _net_wm_window_type, XA_ATOM, 32,
@@ -364,6 +362,15 @@ init_screen (rp_screen *s, int screen_num)
                                          s->fg_color, s->bg_color);
   XChangeProperty (dpy, s->frame_window, _net_wm_window_type, XA_ATOM, 32,
                    PropModeReplace, (unsigned char *)&win_type, 1L);
+
+  /* Create the fake root window */
+  s->fake_root_window = XCreateSimpleWindow (dpy, s->root,
+                                             s->width + 1, s->height + 1, 1, 1,
+                                             0, s->fg_color, s->fakeroot_color);
+  XChangeProperty (dpy, s->fake_root_window, _net_wm_window_type, XA_ATOM, 32,
+                   PropModeReplace, (unsigned char *)&win_type, 1L);
+  XMapWindow (dpy, s->fake_root_window);
+  XLowerWindow (dpy, s->fake_root_window);
 
   /* Create the help window */
   s->help_window = XCreateSimpleWindow (dpy, s->root, s->left, s->top, s->width,
@@ -441,7 +448,8 @@ is_rp_window_for_given_screen (Window w, rp_screen *s)
       w != s->bar_window &&
       w != s->input_window &&
       w != s->frame_window &&
-      w != s->help_window)
+      w != s->help_window &&
+      w != s->fake_root_window)
     return 0;
   return 1;
 }
@@ -511,6 +519,7 @@ screen_update (rp_screen *s, int width, int height)
   s->width = width; s->height = height;
 
   XResizeWindow (dpy, s->help_window, width, height);
+  XResizeWindow (dpy, s->fake_root_window, width, height);
 
   list_for_each_entry (f, &s->frames, node)
     {

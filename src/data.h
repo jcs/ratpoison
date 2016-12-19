@@ -161,13 +161,14 @@ struct rp_virtual
 struct rp_screen
 {
   GC normal_gc, inverse_gc;
-  Window root, bar_window, key_window, input_window, frame_window, help_window;
+  Window root, bar_window, key_window, input_window, frame_window, help_window,
+  	fake_root_window;
   int bar_is_raised;
   int screen_num;               /* Our screen number as dictated my X */
   int xine_screen_num;          /* Our screen number for the Xinerama extension */
   Colormap def_cmap;
   Cursor rat;
-  unsigned long fg_color, bg_color, fw_color, bw_color; /* The pixel color. */
+  unsigned long fg_color, bg_color, fw_color, bw_color, fakeroot_color; /* The pixel color. */
 
   /* Here to abstract over the Xinerama vs X screens difference */
   int left, top, width, height;
@@ -227,6 +228,7 @@ struct rp_defaults
   int input_window_size;
   int window_border_width;
   int gap;
+  int fakeroot;
 
   int bar_x_padding;
   int bar_y_padding;
@@ -255,6 +257,7 @@ struct rp_defaults
   char *bgcolor_string;
   char *fwcolor_string;
   char *bwcolor_string;
+  char *fakerootcolor_string;
 
   int wait_for_key_cursor;
 

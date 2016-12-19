@@ -185,6 +185,8 @@ static cmdret * set_rudeness(struct cmdarg **args);
 static cmdret * set_virtuals(struct cmdarg **args);
 static cmdret * set_screensize(struct cmdarg **args);
 static cmdret * set_gap(struct cmdarg **args);
+static cmdret * set_fakeroot(struct cmdarg **args);
+static cmdret * set_fakerootcolor(struct cmdarg **args);
 
 /* command function prototypes. */
 static cmdret *cmd_abort (int interactive, struct cmdarg **args);
@@ -386,6 +388,8 @@ init_set_vars (void)
   add_set_var ("screensize", set_screensize, 2,
                "", arg_NUMBER, "", arg_NUMBER);
   add_set_var ("gap", set_gap, 1, "", arg_NUMBER);
+  add_set_var ("fakeroot", set_fakeroot, 1, "", arg_STRING);
+  add_set_var ("fakerootcolor", set_fakerootcolor, 1, "", arg_STRING);
 }
 
 /* i_nrequired is the number required when called
@@ -4517,6 +4521,63 @@ set_bwcolor (struct cmdarg **args)
 }
 
 static cmdret *
+set_fakeroot (struct cmdarg **args)
+{
+  int i;
+
+  if (args[0] == NULL)
+    return cmdret_new (RET_SUCCESS, "%s", defaults.fakeroot ? "on":"off");
+
+  if (!strcasecmp (ARG_STRING(0), "on"))
+    defaults.fakeroot = 1;
+  else if (!strcasecmp (ARG_STRING(0), "off"))
+    defaults.fakeroot = 0;
+  else
+    return cmdret_new (RET_FAILURE, "fakeroot: invalid argument");
+
+  for (i=0; i<num_screens; i++)
+    {
+      if (defaults.fakeroot)
+        XMoveResizeWindow (dpy, screens[i].fake_root_window,
+                           screens[i].left, screens[i].top, screens[i].width,
+                           screens[i].height);
+      else
+        XMoveResizeWindow (dpy, screens[i].fake_root_window,
+                           screens[i].left + screens[i].width + 1,
+                           screens[i].top + screens[i].height + 1, 1, 1);
+    }
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+static cmdret *
+set_fakerootcolor (struct cmdarg **args)
+{
+  int i;
+  XColor color, junk;
+
+  if (args[0] == NULL)
+    return cmdret_new (RET_SUCCESS, "%s", defaults.fakerootcolor_string);
+
+  for (i=0; i<num_screens; i++)
+    {
+      if (!XAllocNamedColor (dpy, screens[i].def_cmap, ARG_STRING(0), &color, &junk))
+        return cmdret_new (RET_FAILURE, "fakerootcolor: unknown color");
+
+      screens[i].fakeroot_color = color.pixel;
+      update_gc (&screens[i]);
+
+      free (defaults.fakerootcolor_string);
+      defaults.fakerootcolor_string = xstrdup (ARG_STRING(0));
+
+      XSetWindowBackground (dpy, screens[i].fake_root_window, color.pixel);
+      XClearWindow (dpy, screens[i].fake_root_window);
+    }
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+static cmdret *
 set_virtuals (struct cmdarg **args)
 {
   if (args[0] == NULL)
@@ -5092,6 +5153,7 @@ sync_wins (rp_screen *s)
           || wins[i] == s->input_window
           || wins[i] == s->frame_window
           || wins[i] == s->help_window
+          || wins[i] == s->fake_root_window
           || attr.override_redirect == True) continue;
 
       /* Find the window in our mapped window list. */

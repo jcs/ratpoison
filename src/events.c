@@ -98,7 +98,8 @@ new_window (XCreateWindowEvent *e)
       && e->window != s->bar_window
       && e->window != s->input_window
       && e->window != s->frame_window
-      && e->window != s->help_window)
+      && e->window != s->help_window
+      && e->window != s->fake_root_window)
     {
       win = add_to_window_list (s, e->window);
       update_window_information (win);

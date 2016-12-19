@@ -25,3 +25,9 @@ not be suitable for pushing upstream.
 
 - Add a `gap` setting which puts space inside of frames, outside of the window
   border, similar to i3-gaps.
+
+- Add a `fakeroot` toggle and `fakerootcolor` setting which will draw a full-
+  screen colored window underneath all other windows, emulating a root window.
+  This is useful for XQuartz on macOS when not using full-screen mode to hide
+  the desktop icons which appear when using the `gap` setting or xterms that
+  enforce their window sizes to slightly less than the frame size.

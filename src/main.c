@@ -529,6 +529,7 @@ init_defaults (void)
   defaults.bar_border_width    = 1;
   defaults.bar_in_padding      = 0;
   defaults.bar_sticky          = 0;
+  defaults.fakeroot            = 0;
 
   defaults.frame_indicator_timeout = 1;
   defaults.frame_resize_unit = 10;
@@ -571,6 +572,7 @@ init_defaults (void)
   defaults.bgcolor_string = xstrdup ("white");
   defaults.fwcolor_string = xstrdup ("black");
   defaults.bwcolor_string = xstrdup ("black");
+  defaults.fakerootcolor_string = xstrdup ("white");
 
   defaults.wait_for_key_cursor = 1;
 
@@ -807,6 +809,7 @@ free_screen (rp_screen *s)
   XDestroyWindow (dpy, s->input_window);
   XDestroyWindow (dpy, s->frame_window);
   XDestroyWindow (dpy, s->help_window);
+  XDestroyWindow (dpy, s->fake_root_window);
 
 #ifdef USE_XFT_FONT
   if (s->xft_font)
