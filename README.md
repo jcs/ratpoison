@@ -1,4 +1,4 @@
-###ratpoison-jcs
+### ratpoison-jcs
 
 *(Note: this was migrated from commits on upstream's `master` branch to a new
 `jcs` branch on 2016-12-19)*
