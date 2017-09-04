@@ -4594,16 +4594,22 @@ set_virtuals (struct cmdarg **args)
 static cmdret *
 set_gap (struct cmdarg **args)
 {
-  int new_value;
+  rp_window *win;
 
   if (args[0] == NULL)
     return cmdret_new (RET_SUCCESS, "%d", defaults.gap);
 
-  new_value = ARG(0,number);
-  if (new_value < 0)
+  if (ARG(0,number) < 0)
     return cmdret_new (RET_FAILURE, "gap: invalid argument");
 
-  defaults.gap = new_value;
+  defaults.gap = ARG(0,number);
+
+  /* Update all the visible windows. */
+  list_for_each_entry (win,&rp_mapped_window,node)
+    {
+      if (win_get_frame (win))
+        maximize (win);
+    }
 
   return cmdret_new (RET_SUCCESS, NULL);
 }
