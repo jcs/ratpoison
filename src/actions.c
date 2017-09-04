@@ -6525,7 +6525,7 @@ cmd_vinit (int interactive, struct cmdarg **args)
     frestore (first->fconfig, screen);
   } else
     PRINT_DEBUG (("vinit: no first virtual?!\n"));
-  
+
   return cmdret_new (RET_SUCCESS, NULL);
 }
 
@@ -6534,12 +6534,18 @@ cmd_vmove (int interactive, struct cmdarg **args)
 {
   char *input;
   int which = ARG(0, number);
+  int found = 0;
 
   rp_virtual *cur;
   rp_group *g;
+  rp_window *curw, *prevw;
+  rp_frame *frame = current_frame();
 
-  if (current_window() == NULL)
+  curw = current_window ();
+  if (curw == NULL)
     return cmdret_new (RET_FAILURE, "vmove: no focused window");
+
+  prevw = group_prev_window (rp_current_group, curw);
 
   list_for_each_entry (cur, &rp_virtuals, node) {
     if (cur->number == which) {
@@ -6549,14 +6555,29 @@ cmd_vmove (int interactive, struct cmdarg **args)
         input = xsprintf ("virtual%d", cur->number);
 
       if ((g = groups_find_group_by_name(input, 1)) != NULL) {
-        group_move_window (g, current_window());
-
-        return cmdret_new (RET_SUCCESS, NULL);
+        group_move_window (g, curw);
+        found = 1;
+        break;
       }
     }
   }
 
-  return cmdret_new (RET_FAILURE, "vmove: no such virtual workspace");
+  if (!found)
+    return cmdret_new (RET_FAILURE, "vmove: no such virtual workspace");
+
+  /* select previous window in this group to make this one disappear */
+  if (prevw)
+    set_active_window (prevw);
+  else
+    frame->win_number = EMPTY;
+
+  /* then switch to the found virtual */
+  cmd_vselect (0, args);
+
+  /* and make the moved window the current */
+  set_active_window (curw);
+
+  return cmdret_new (RET_SUCCESS, NULL);
 }
 
 cmdret *
