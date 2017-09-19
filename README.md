@@ -34,3 +34,7 @@ not be suitable for pushing upstream.
   This is useful for XQuartz on macOS when not using full-screen mode to hide
   the desktop icons which appear when using the `gap` setting or xterms that
   enforce their window sizes to slightly less than the frame size.
+
+- Add an `ignorehints` toggle which will ignore XSizeHints.  This is useful for
+  making terminal windows use the full frame size instead of constraining to
+  a per-character-cell multiplier for the width and height.
