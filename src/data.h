@@ -315,6 +315,9 @@ struct rp_defaults
 
   /* Number of virtual workspaces */
   int virtuals;
+
+  /* Whether to ignore window size hints */
+  int ignorehints;
 };
 
 /* Information about a child process. */

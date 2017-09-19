@@ -185,6 +185,7 @@ static cmdret * set_warp(struct cmdarg **args);
 static cmdret * set_rudeness(struct cmdarg **args);
 static cmdret * set_virtuals(struct cmdarg **args);
 static cmdret * set_gap(struct cmdarg **args);
+static cmdret * set_ignorehints(struct cmdarg **args);
 
 /* command function prototypes. */
 static cmdret *cmd_abort (int interactive, struct cmdarg **args);
@@ -302,6 +303,7 @@ static cmdret *cmd_undo (int interactive, struct cmdarg **args);
 static cmdret *cmd_redo (int interactive, struct cmdarg **args);
 static cmdret *cmd_putsel (int interactive, struct cmdarg **args);
 static cmdret *cmd_getsel (int interactive, struct cmdarg **args);
+
 static cmdret *cmd_vdump (int interactive, struct cmdarg **args);
 static cmdret *cmd_vinit (int interactive, struct cmdarg **args);
 static cmdret *cmd_vmove (int interactive, struct cmdarg **args);
@@ -368,6 +370,7 @@ init_set_vars (void)
   add_set_var ("historysize", set_historysize, 1, "", arg_NUMBER);
   add_set_var ("infofmt", set_infofmt, 1, "", arg_REST);
   add_set_var ("inputwidth", set_inputwidth, 1, "", arg_NUMBER);
+  add_set_var ("ignorehints", set_ignorehints, 1, "", arg_STRING);
   add_set_var ("maxsizegravity", set_maxsizegravity, 1, "", arg_GRAVITY);
   add_set_var ("maxundos", set_maxundos, 1, "", arg_NUMBER);
   add_set_var ("msgwait", set_msgwait, 1, "", arg_NUMBER);
@@ -4563,6 +4566,24 @@ set_gap (struct cmdarg **args)
       if (win_get_frame (win))
         maximize (win);
     }
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+static cmdret *
+set_ignorehints (struct cmdarg **args)
+{
+  if (args[0] == NULL)
+    return cmdret_new (RET_SUCCESS, "%s", defaults.ignorehints ? "on":"off");
+
+  if (!strcasecmp (ARG_STRING(0), "on"))
+    defaults.ignorehints = 1;
+  else if (!strcasecmp (ARG_STRING(0), "off"))
+    defaults.ignorehints = 0;
+  else
+    return cmdret_new (RET_FAILURE, "ignorehints: invalid argument");
+
+  force_maximize (current_window());
 
   return cmdret_new (RET_SUCCESS, NULL);
 }
