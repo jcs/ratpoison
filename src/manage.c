@@ -670,7 +670,7 @@ maximize_transient (rp_window *win)
 
   /* Make sure we maximize to the nearest Resize Increment specified
      by the window */
-  if (win->hints->flags & PResizeInc)
+  if (!defaults.ignorehints && win->hints->flags & PResizeInc)
     {
       int amount;
       int delta;
@@ -719,7 +719,7 @@ maximize_normal (rp_window *win)
   win->border = defaults.window_border_width;
 
   /* Honour the window's maximum size */
-  if (win->hints->flags & PMaxSize)
+  if (!defaults.ignorehints && win->hints->flags & PMaxSize)
     {
       maxx = win->hints->max_width;
       maxy = win->hints->max_height;
@@ -732,7 +732,7 @@ maximize_normal (rp_window *win)
 
   /* Honour the window's aspect ratio. */
   PRINT_DEBUG (("aspect: %ld\n", win->hints->flags & PAspect));
-  if (win->hints->flags & PAspect)
+  if (!defaults.ignorehints && win->hints->flags & PAspect)
     {
       float ratio = (float)maxx / maxy;
       float min_ratio = (float)win->hints->min_aspect.x / win->hints->min_aspect.y;
@@ -763,7 +763,7 @@ maximize_normal (rp_window *win)
 
   /* Make sure we maximize to the nearest Resize Increment specified
      by the window */
-  if (win->hints->flags & PResizeInc)
+  if (!defaults.ignorehints && win->hints->flags & PResizeInc)
     {
       int amount;
       int delta;
@@ -838,7 +838,7 @@ force_maximize (rp_window *win)
      already "maximized" X11 will optimize away the event since to
      geometry changes were made. This initial resize solves the
      problem. */
-  if (win->hints->flags & PResizeInc)
+  if (!defaults.ignorehints && win->hints->flags & PResizeInc)
     {
       XMoveResizeWindow (dpy, win->w, win->scr->left + win->x, win->scr->top + win->y,
                          win->width + win->hints->width_inc,

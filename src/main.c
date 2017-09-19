@@ -592,6 +592,8 @@ init_defaults (void)
   defaults.maxundos = 20;
 
   defaults.virtuals = 5;
+
+  defaults.ignorehints = 0;
 }
 
 int

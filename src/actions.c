@@ -182,11 +182,13 @@ static cmdret * set_framemsgwait(struct cmdarg **args);
 static cmdret * set_startupmessage(struct cmdarg **args);
 static cmdret * set_warp(struct cmdarg **args);
 static cmdret * set_rudeness(struct cmdarg **args);
-static cmdret * set_virtuals(struct cmdarg **args);
-static cmdret * set_screensize(struct cmdarg **args);
+
 static cmdret * set_gap(struct cmdarg **args);
 static cmdret * set_fakeroot(struct cmdarg **args);
 static cmdret * set_fakerootcolor(struct cmdarg **args);
+static cmdret * set_ignorehints(struct cmdarg **args);
+static cmdret * set_screensize(struct cmdarg **args);
+static cmdret * set_virtuals(struct cmdarg **args);
 
 /* command function prototypes. */
 static cmdret *cmd_abort (int interactive, struct cmdarg **args);
@@ -304,6 +306,7 @@ static cmdret *cmd_undo (int interactive, struct cmdarg **args);
 static cmdret *cmd_redo (int interactive, struct cmdarg **args);
 static cmdret *cmd_putsel (int interactive, struct cmdarg **args);
 static cmdret *cmd_getsel (int interactive, struct cmdarg **args);
+
 static cmdret *cmd_vdump (int interactive, struct cmdarg **args);
 static cmdret *cmd_vinit (int interactive, struct cmdarg **args);
 static cmdret *cmd_vmove (int interactive, struct cmdarg **args);
@@ -383,13 +386,15 @@ init_set_vars (void)
   add_set_var ("wingravity", set_wingravity, 1, "", arg_GRAVITY);
   add_set_var ("winliststyle", set_winliststyle, 1, "", arg_STRING);
   add_set_var ("winname", set_winname, 1, "", arg_STRING);
-  add_set_var ("virtuals", set_virtuals, 1, "", arg_NUMBER);
+
   add_set_var ("barsticky", set_barsticky, 1, "", arg_STRING);
-  add_set_var ("screensize", set_screensize, 2,
-               "", arg_NUMBER, "", arg_NUMBER);
-  add_set_var ("gap", set_gap, 1, "", arg_NUMBER);
   add_set_var ("fakeroot", set_fakeroot, 1, "", arg_STRING);
   add_set_var ("fakerootcolor", set_fakerootcolor, 1, "", arg_STRING);
+  add_set_var ("gap", set_gap, 1, "", arg_NUMBER);
+  add_set_var ("ignorehints", set_ignorehints, 1, "", arg_STRING);
+  add_set_var ("screensize", set_screensize, 2,
+               "", arg_NUMBER, "", arg_NUMBER);
+  add_set_var ("virtuals", set_virtuals, 1, "", arg_NUMBER);
 }
 
 /* i_nrequired is the number required when called
@@ -4610,6 +4615,24 @@ set_gap (struct cmdarg **args)
       if (win_get_frame (win))
         maximize (win);
     }
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+static cmdret *
+set_ignorehints (struct cmdarg **args)
+{
+  if (args[0] == NULL)
+    return cmdret_new (RET_SUCCESS, "%s", defaults.ignorehints ? "on":"off");
+
+  if (!strcasecmp (ARG_STRING(0), "on"))
+    defaults.ignorehints = 1;
+  else if (!strcasecmp (ARG_STRING(0), "off"))
+    defaults.ignorehints = 0;
+  else
+    return cmdret_new (RET_FAILURE, "ignorehints: invalid argument");
+
+  force_maximize (current_window());
 
   return cmdret_new (RET_SUCCESS, NULL);
 }
