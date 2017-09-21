@@ -12,22 +12,12 @@ not be suitable for pushing upstream.
 
 - A `barsticky` toggle to keep the current window title visible all the time.
 
-- Support the `_NET_ACTIVE_WINDOW` atom.
+- Add a `gap` setting which puts space inside of frames, outside of the window
+  border, similar to i3-gaps.
 
 - Add a `screensize` setting (width and height) to overide the current screen
   size.  Useful for avoiding resizing when the screen actually changes size
   such as when plugging in an external monitor.
-
-- Support the `_NET_WORKAREA` atom to communicate our `padding` values with apps
-  like notification-daemon, so they don't appear on top of whatever is in that
-  padding area.
-
-- Forcibly redraw window borders since some X server drivers that use
-  `shadowfb` (like `vmware` and `vesa`) don't get notified when border changes
-  happen and they end up getting corrupted.
-
-- Add a `gap` setting which puts space inside of frames, outside of the window
-  border, similar to i3-gaps.
 
 - Add a `fakeroot` toggle and `fakerootcolor` setting which will draw a full-
   screen colored window underneath all other windows, emulating a root window.
@@ -38,3 +28,13 @@ not be suitable for pushing upstream.
 - Add an `ignorehints` toggle which will ignore XSizeHints.  This is useful for
   making terminal windows use the full frame size instead of constraining to
   a per-character-cell multiplier for the width and height.
+
+- Add a `resizefmt` format setting, to control the label shown when
+  interactively resizing a frame, and change the default to show the frame
+  width and height.
+
+- Support the `_NET_ACTIVE_WINDOW` atom.
+
+- Support the `_NET_WORKAREA` atom to communicate our `padding` values with apps
+  like notification-daemon, so they don't appear on top of whatever is in that
+  padding area.
