@@ -318,6 +318,9 @@ struct rp_defaults
 
   /* Whether to ignore window size hints */
   int ignorehints;
+
+  /* Resize indicator format */
+  char *resize_fmt;
 };
 
 /* Information about a child process. */

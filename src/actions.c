@@ -165,6 +165,7 @@ static cmdret * set_waitcursor (struct cmdarg **args);
 static cmdret * set_winfmt (struct cmdarg **args);
 static cmdret * set_winname (struct cmdarg **args);
 static cmdret * set_framefmt (struct cmdarg **args);
+static cmdret * set_resizefmt (struct cmdarg **args);
 static cmdret * set_fgcolor (struct cmdarg **args);
 static cmdret * set_bgcolor (struct cmdarg **args);
 static cmdret * set_fwcolor (struct cmdarg **args);
@@ -376,6 +377,7 @@ init_set_vars (void)
   add_set_var ("msgwait", set_msgwait, 1, "", arg_NUMBER);
   add_set_var ("padding", set_padding, 4, "", arg_NUMBER, "", arg_NUMBER, "",
                arg_NUMBER, "", arg_NUMBER);
+  add_set_var ("resizefmt", set_resizefmt, 1, "", arg_REST);
   add_set_var ("resizeunit", set_resizeunit, 1, "", arg_NUMBER);
   add_set_var ("rudeness", set_rudeness, 1, "", arg_NUMBER);
   add_set_var ("startupmessage", set_startupmessage, 1, "", arg_NUMBER);
@@ -3345,7 +3347,7 @@ cmd_resize (int interactive, struct cmdarg **args)
         {
           struct resize_binding *binding;
 
-          show_frame_message ("Resize frame");
+          show_frame_message (defaults.resize_fmt);
           read_key (&c, &mod, buffer, sizeof (buffer));
 
           /* Convert the mask to be compatible with ratpoison. */
@@ -4396,6 +4398,18 @@ set_framefmt (struct cmdarg **args)
 
   free (defaults.frame_fmt);
   defaults.frame_fmt = xstrdup (ARG_STRING(0));
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+static cmdret *
+set_resizefmt (struct cmdarg **args)
+{
+  if (args[0] == NULL)
+    return cmdret_new (RET_SUCCESS, "%s", defaults.resize_fmt);
+
+  free (defaults.resize_fmt);
+  defaults.resize_fmt = xstrdup (ARG_STRING(0));
 
   return cmdret_new (RET_SUCCESS, NULL);
 }
