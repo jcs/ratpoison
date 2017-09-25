@@ -585,15 +585,23 @@ move_window (rp_window *win)
       break;
     }
 
-  if (win->x < frame->x + defaults.gap)
-    win->x = frame->x + defaults.gap;
-  if (win->y < frame->y + defaults.gap)
-    win->y = frame->y + defaults.gap;
+  if (defaults.only_border == 0 && num_frames(win->scr) <= 1)
+    {
+      win->x = frame->x;
+      win->y = frame->y;
+    }
+  else
+    {
+      if (win->x < frame->x + defaults.gap)
+        win->x = frame->x + defaults.gap;
+      if (win->y < frame->y + defaults.gap)
+        win->y = frame->y + defaults.gap;
 
-  if (frame->x == defaults.padding_left)
-    win->x += defaults.gap;
-  if (frame->y == defaults.padding_top)
-    win->y += defaults.gap;
+      if (frame->x == defaults.padding_left)
+        win->x += defaults.gap;
+      if (frame->y == defaults.padding_top)
+        win->y += defaults.gap;
+    }
 }
 
 /* Set a transient window's x,y,width,height fields to maximize the
@@ -611,7 +619,10 @@ maximize_transient (rp_window *win)
     return;
 
   /* Set the window's border */
-  win->border = defaults.window_border_width;
+  if (defaults.only_border == 0 && num_frames(win->scr) <= 1)
+    win->border = 0;
+  else
+    win->border = defaults.window_border_width;
 
   /* Always use the window's current width and height for
      transients. */
@@ -676,18 +687,21 @@ maximize_normal (rp_window *win)
     return;
 
   /* Set the window's border */
-  if (defaults.only_border == 0 && num_frames(win->scr) <= 1){
+  if (defaults.only_border == 0 && num_frames(win->scr) <= 1)
     win->border = 0;
-  } else {
+  else
     win->border = defaults.window_border_width;
-  }
-
 
   /* Honour the window's maximum size */
   if (win->hints->flags & PMaxSize)
     {
       maxx = win->hints->max_width;
       maxy = win->hints->max_height;
+    }
+  else if (defaults.only_border == 0 && num_frames(win->scr) <= 1)
+    {
+      maxx = frame->width;
+      maxy = frame->height;
     }
   else
     {
@@ -720,15 +734,20 @@ maximize_normal (rp_window *win)
       PRINT_DEBUG (("frame width=%d height=%d\n",
                    frame->width, frame->height));
 
-      gapx = gapy = 2;
-      if (frame->x == defaults.padding_left)
-        gapx++;
-      if (frame->x + frame->width == win->scr->width - defaults.padding_right)
-        gapx++;
-      if (frame->y == defaults.padding_top)
-        gapy++;
-      if (frame->y + frame->height == win->scr->height - defaults.padding_bottom)
-        gapy++;
+      if (defaults.only_border == 0 && num_frames(win->scr) <= 1)
+        gapx = gapy = 0;
+      else
+        {
+          gapx = gapy = 2;
+          if (frame->x == defaults.padding_left)
+            gapx++;
+          if (frame->x + frame->width == win->scr->width - defaults.padding_right)
+            gapx++;
+          if (frame->y == defaults.padding_top)
+            gapy++;
+          if (frame->y + frame->height == win->scr->height - defaults.padding_bottom)
+            gapy++;
+	}
 
       if (maxx > frame->width - (win->border * 2) - (defaults.gap * gapx))
         maxx = frame->width - (win->border * 2) - (defaults.gap * gapx);
