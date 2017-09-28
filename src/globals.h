@@ -142,6 +142,7 @@ extern Atom _net_supported;
 extern Atom _net_active_window;
 extern Atom _net_wm_window_type;
 extern Atom _net_wm_window_type_dialog;
+extern Atom _net_wm_window_type_dock;
 extern Atom _net_wm_name;
 extern Atom _net_workarea;
 

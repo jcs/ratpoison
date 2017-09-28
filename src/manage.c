@@ -345,7 +345,7 @@ window_is_transient (rp_window *win)
 }
 
 static Atom
-get_net_wm_window_type (rp_window *win)
+get_net_wm_window_type (Window w)
 {
   Atom type, window_type = None;
   int format;
@@ -353,10 +353,7 @@ get_net_wm_window_type (rp_window *win)
   unsigned long bytes_left;
   unsigned char *data;
 
-  if (win == NULL)
-    return None;
-
-  if (XGetWindowProperty (dpy, win->w, _net_wm_window_type, 0, 1L,
+  if (XGetWindowProperty (dpy, w, _net_wm_window_type, 0, 1L,
                           False, XA_ATOM, &type, &format,
                           &nitems, &bytes_left,
                           &data) == Success && nitems > 0)
@@ -392,7 +389,7 @@ update_window_information (rp_window *win)
   /* Transient status */
   win->transient = XGetTransientForHint (dpy, win->w, &win->transient_for);
 
-  if (get_net_wm_window_type(win) == _net_wm_window_type_dialog)
+  if (get_net_wm_window_type(win->w) == _net_wm_window_type_dialog)
     win->transient = 1;
 
   update_window_gravity (win);
@@ -473,6 +470,9 @@ unmanaged_window (Window w)
 {
   char *wname;
   int i;
+
+  if (get_net_wm_window_type(w) == _net_wm_window_type_dock)
+    return 1;
 
   if (!unmanaged_window_list)
     return 0;
