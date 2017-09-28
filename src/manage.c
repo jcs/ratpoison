@@ -585,7 +585,7 @@ move_window (rp_window *win)
       break;
     }
 
-  if (defaults.only_border == 0 && num_frames(win->scr) <= 1)
+  if (!win->transient && defaults.only_border == 0 && num_frames(win->scr) <= 1)
     {
       win->x = frame->x;
       win->y = frame->y;
@@ -619,10 +619,7 @@ maximize_transient (rp_window *win)
     return;
 
   /* Set the window's border */
-  if (defaults.only_border == 0 && num_frames(win->scr) <= 1)
-    win->border = 0;
-  else
-    win->border = defaults.window_border_width;
+  win->border = defaults.window_border_width;
 
   /* Always use the window's current width and height for
      transients. */
