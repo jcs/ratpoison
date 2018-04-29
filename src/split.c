@@ -79,6 +79,8 @@ set_frames_window (rp_frame *frame, rp_window *win)
     {
       frame->win_number = win->number;
       win->frame_number = frame->number;
+      if (win->sticky_frame >= 0)
+        win->sticky_frame = frame->number;
 
       /* We need to make sure that win and frame are on the same screen,
        * since with Xrandr, windows can move from one screen to another.
@@ -279,7 +281,8 @@ find_window_for_frame (rp_frame *frame)
           && !find_windows_frame (cur->win)
           && cur->win->last_access >= last_access
           && window_fits_in_frame (cur->win, frame)
-          && cur->win->frame_number == EMPTY)
+          && cur->win->frame_number == EMPTY
+          && (cur->win->sticky_frame == EMPTY || cur->win->sticky_frame == frame->number))
         {
           most_recent = cur;
           last_access = cur->win->last_access;

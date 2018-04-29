@@ -113,6 +113,10 @@ struct rp_window
      is mapped and this is >0 then use the frame (if it exists). */
   int intended_frame_number;
 
+  /* Frame in which this window should stay unless explicitly moved, rather
+   * than be cycled into another frame. */
+  int sticky_frame;
+
   struct list_head node;
 };
 

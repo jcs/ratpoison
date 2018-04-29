@@ -180,6 +180,7 @@ add_to_window_list (rp_screen *s, Window w)
   new_window->hints = XAllocSizeHints ();
   new_window->colormap = DefaultColormap (dpy, s->screen_num);
   new_window->transient = XGetTransientForHint (dpy, new_window->w, &new_window->transient_for);
+  new_window->sticky_frame = EMPTY;
   PRINT_DEBUG (("transient %d\n", new_window->transient));
 
   update_window_gravity (new_window);

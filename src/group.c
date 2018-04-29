@@ -221,7 +221,7 @@ group_last_group (void)
     {
       if (cur != rp_current_group && cur->last_access > last_access) {
         most_recent = cur;
-	last_access = cur->last_access;
+        last_access = cur->last_access;
       }
     }
   return most_recent;
@@ -494,6 +494,8 @@ group_last_window (rp_group *g, rp_screen *s)
       if (cur->win->last_access >= last_access
           && cur->win != current_window()
           && !find_windows_frame (cur->win)
+          && (cur->win->sticky_frame == EMPTY
+              || cur->win->sticky_frame == current_frame()->number)
           && (cur->win->scr == s || rp_have_xrandr))
         {
           most_recent = cur;
@@ -511,6 +513,7 @@ rp_window *
 group_next_window (rp_group *g, rp_window *win)
 {
   rp_window_elem *cur, *we;
+  rp_frame *curframe;
 
   /* If there is no window, then get the last accessed one. */
   if (win == NULL)
@@ -522,6 +525,8 @@ group_next_window (rp_group *g, rp_window *win)
   if (we == NULL)
     return group_last_window (g, win->scr);
 
+  curframe = find_windows_frame (win);
+
   /* The window is in this group, so find the next one in the list
      that isn't already displayed. */
   for (cur = list_next_entry (we, &g->mapped_windows, node);
@@ -530,6 +535,10 @@ group_next_window (rp_group *g, rp_window *win)
     {
       if (!find_windows_frame (cur->win) && (cur->win->scr == win->scr || rp_have_xrandr))
         {
+          if (cur->win->sticky_frame != EMPTY && curframe != NULL
+            && cur->win->sticky_frame != curframe->number)
+            continue;
+
           return cur->win;
         }
     }
@@ -541,6 +550,7 @@ rp_window *
 group_prev_window (rp_group *g, rp_window *win)
 {
   rp_window_elem *cur, *we;
+  rp_frame *curframe;
 
   /* If there is no window, then get the last accessed one. */
   if (win == NULL)
@@ -552,6 +562,8 @@ group_prev_window (rp_group *g, rp_window *win)
   if (we == NULL)
     return group_last_window (g, win->scr);
 
+  curframe = find_windows_frame (win);
+
   /* The window is in this group, so find the previous one in the list
      that isn't already displayed. */
   for (cur = list_prev_entry (we, &g->mapped_windows, node);
@@ -560,6 +572,10 @@ group_prev_window (rp_group *g, rp_window *win)
     {
       if (!find_windows_frame (cur->win) && (cur->win->scr == win->scr || rp_have_xrandr))
         {
+          if (cur->win->sticky_frame != EMPTY && curframe != NULL
+            && cur->win->sticky_frame != curframe->number)
+            continue;
+
           return cur->win;
         }
     }

@@ -265,11 +265,13 @@ static cmdret *cmd_setenv (int interactive, struct cmdarg **args);
 static cmdret *cmd_shrink (int interactive, struct cmdarg **args);
 static cmdret *cmd_source (int interactive, struct cmdarg **args);
 static cmdret *cmd_startup_message (int interactive, struct cmdarg **args);
+static cmdret *cmd_stick (int interactive, struct cmdarg **args);
 static cmdret *cmd_time (int interactive, struct cmdarg **args);
 static cmdret *cmd_tmpwm (int interactive, struct cmdarg **args);
 static cmdret *cmd_unalias (int interactive, struct cmdarg **args);
 static cmdret *cmd_unmanage (int interactive, struct cmdarg **args);
 static cmdret *cmd_unsetenv (int interactive, struct cmdarg **args);
+static cmdret *cmd_unstick (int interactive, struct cmdarg **args);
 static cmdret *cmd_v_split (int interactive, struct cmdarg **args);
 static cmdret *cmd_verbexec (int interactive, struct cmdarg **args);
 static cmdret *cmd_version (int interactive, struct cmdarg **args);
@@ -591,6 +593,7 @@ init_user_commands(void)
                "Screen: ", arg_NUMBER);
   add_command ("startup_message", cmd_startup_message,  1, 1, 1,
                "Startup message: ", arg_STRING);
+  add_command ("stick",         cmd_stick,      0, 0, 0);
   add_command ("time",          cmd_time,       0, 0, 0);
   add_command ("title",         cmd_rename,     1, 1, 1,
                "Set window's title to: ", arg_REST);
@@ -602,6 +605,7 @@ init_user_commands(void)
                "Unmanage: ", arg_REST);
   add_command ("unsetenv",      cmd_unsetenv,   1, 1, 1,
                "Variable: ", arg_STRING);
+  add_command ("unstick",       cmd_unstick,    0, 0, 0);
   add_command ("verbexec",      cmd_verbexec,   1, 1, 1,
                "/bin/sh -c ", arg_SHELLCMD);
   add_command ("version",       cmd_version,    0, 0, 0);
@@ -6655,4 +6659,35 @@ cmd_commands (int interactive UNUSED, struct cmdarg **args UNUSED)
   ret = cmdret_new (RET_SUCCESS, "%s", sbuf_get (sb));
   sbuf_free (sb);
   return ret;
+}
+
+cmdret *
+cmd_stick (int interactive UNUSED, struct cmdarg **args UNUSED)
+{
+  rp_window *cur = current_window();
+  rp_frame *frame;
+
+  if (cur)
+    {
+      frame = find_windows_frame (cur);
+      if (frame)
+        cur->sticky_frame = find_windows_frame(cur)->number;
+    }
+  else
+    return cmdret_new (RET_FAILURE, "%s", MESSAGE_NO_MANAGED_WINDOWS);
+
+  return cmdret_new (RET_SUCCESS, NULL);
+}
+
+cmdret *
+cmd_unstick (int interactive UNUSED, struct cmdarg **args UNUSED)
+{
+  rp_window *cur = current_window();
+
+  if (cur)
+    cur->sticky_frame = EMPTY;
+  else
+    return cmdret_new (RET_FAILURE, "%s", MESSAGE_NO_MANAGED_WINDOWS);
+
+  return cmdret_new (RET_SUCCESS, NULL);
 }
