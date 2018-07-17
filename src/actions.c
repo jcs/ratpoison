@@ -6607,6 +6607,9 @@ cmd_vselect (int interactive, struct cmdarg **args)
   rp_virtual *cur;
   rp_screen *screen = rp_current_screen;
 
+  if (rp_current_virtual == NULL)
+    return cmdret_new (RET_FAILURE, "vselect: no virtual workspaces");
+
   if (rp_current_virtual->number == which)
     /* don't bother */
     return cmdret_new (RET_SUCCESS, NULL);
