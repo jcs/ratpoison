@@ -236,6 +236,7 @@ init_defaults (void)
   defaults.bar_border_width    = 1;
   defaults.bar_in_padding      = 0;
   defaults.bar_sticky          = 0;
+  defaults.bar_sticky_bleed    = 30;
 
   defaults.frame_indicator_timeout = 1;
   defaults.frame_resize_unit = 10;

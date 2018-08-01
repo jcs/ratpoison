@@ -151,6 +151,8 @@ bar_x (rp_screen *s, int width)
     case WestGravity:
     case SouthWestGravity:
       x = s->left + (defaults.bar_in_padding ? 0 : defaults.padding_left);
+      if (defaults.bar_sticky && defaults.bar_in_padding)
+        x -= defaults.bar_sticky_bleed;
       break;
     case NorthGravity:
     case CenterGravity:
@@ -380,7 +382,8 @@ draw_partial_string (rp_screen *s, char *msg, int len,
                      int x_offset, int y_offset, int style)
 {
   rp_draw_string (s, s->bar_window, style,
-                  defaults.bar_x_padding + x_offset,
+                  defaults.bar_x_padding + x_offset +
+                  (defaults.bar_sticky ? defaults.bar_sticky_bleed : 0),
                   defaults.bar_y_padding + FONT_ASCENT(s)
                   + y_offset * FONT_HEIGHT (s),
                   msg, len + 1);
@@ -498,7 +501,7 @@ static void
 prepare_bar (rp_screen *s, int width, int height, int multiline)
 {
   if (defaults.bar_sticky)
-    width = s->width;
+    width = s->width + (defaults.bar_sticky_bleed * 2);
   else
     width = width < s->width ? width : s->width;
   height = height < s->height ? height : s->height;

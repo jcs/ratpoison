@@ -471,13 +471,15 @@ update_input_window (rp_screen *s, rp_input_line *line)
   XSync (dpy, False);
 
   rp_draw_string (s, s->input_window, STYLE_NORMAL,
-                  defaults.bar_x_padding,
+                  defaults.bar_x_padding +
+                  (defaults.bar_sticky ? defaults.bar_sticky_bleed : 0),
                   defaults.bar_y_padding + FONT_ASCENT(s),
                   line->prompt, 
                   -1);
 
   rp_draw_string (s, s->input_window, STYLE_NORMAL, 
-                  defaults.bar_x_padding + prompt_width,
+                  defaults.bar_x_padding + prompt_width +
+                  (defaults.bar_sticky ? defaults.bar_sticky_bleed : 0),
                   defaults.bar_y_padding + FONT_ASCENT(s),
                   line->buffer, 
                   line->length);
@@ -489,6 +491,7 @@ update_input_window (rp_screen *s, rp_input_line *line)
   /* Draw a cheap-o cursor - MkIII */
   XFillRectangle (dpy, s->input_window, lgc,
 		  defaults.bar_x_padding + prompt_width +
+                  (defaults.bar_sticky ? defaults.bar_sticky_bleed : 0) +
 		  rp_text_width (s, line->buffer, line->position),
                   defaults.bar_y_padding,
 		  rp_text_width (s, &line->buffer[line->position], char_len),
