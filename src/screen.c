@@ -337,6 +337,7 @@ init_screen (rp_screen *s)
 {
   XGCValues gcv;
   struct sbuf *buf;
+  long val;
   char *colon;
   int screen_num;
 
@@ -412,6 +413,9 @@ init_screen (rp_screen *s)
   s->bar_window = XCreateSimpleWindow (dpy, s->root, 0, 0, 1, 1,
                                        defaults.bar_border_width,
                                        rp_glob_screen.fg_color, rp_glob_screen.bg_color);
+  val = _net_wm_window_type_dock;
+  XChangeProperty (dpy, s->bar_window, _net_wm_window_type, XA_ATOM, 32,
+                   PropModeReplace, (unsigned char *)&val, 1);
 
   /* Setup the window that will receive all keystrokes once the prefix
      key has been pressed. */
@@ -425,10 +429,15 @@ init_screen (rp_screen *s)
                                          defaults.bar_border_width,
                                          rp_glob_screen.fg_color, rp_glob_screen.bg_color);
   XSelectInput (dpy, s->input_window, KeyPressMask | KeyReleaseMask);
+  XChangeProperty (dpy, s->input_window, _net_wm_window_type, XA_ATOM, 32,
+                   PropModeReplace, (unsigned char *)&val, 1);
 
   /* Create the frame indicator window */
   s->frame_window = XCreateSimpleWindow (dpy, s->root, 1, 1, 1, 1, defaults.bar_border_width,
                                          rp_glob_screen.fg_color, rp_glob_screen.bg_color);
+  val = _net_wm_window_type_tooltip;
+  XChangeProperty (dpy, s->frame_window, _net_wm_window_type, XA_ATOM, 32,
+                   PropModeReplace, (unsigned char *)&val, 1);
 
   /* Create the help window */
   s->help_window = XCreateSimpleWindow (dpy, s->root, s->left, s->top, s->width,

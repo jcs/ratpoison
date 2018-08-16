@@ -411,7 +411,9 @@ main (int argc, char *argv[])
   _net_active_window = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
   _net_wm_window_type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
   _net_wm_window_type_dialog = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
+  _net_wm_window_type_tooltip = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_TOOLTIP", False);
   _net_wm_window_type_dock = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
+  _net_wm_window_type_desktop = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
   _net_wm_name = XInternAtom(dpy, "_NET_WM_NAME", False);
   _net_workarea = XInternAtom(dpy, "_NET_WORKAREA", False);
 
